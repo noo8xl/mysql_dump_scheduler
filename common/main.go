@@ -26,12 +26,11 @@ type SqlFiles struct {
 }
 
 type MakeOpts struct {
-	IsEnable bool
-	RunPath  string
+	RunPath string
 }
 
 type SchedulerConfig struct {
-	Path     string        `json:"path"`      // path to the file
+	Path     string        `json:"path"`      // expected path to the dump file
 	File     *os.File      `json:"file"`      // file will be set after the dump is created
 	Duration time.Duration `json:"duration"`  // duration of the scheduler
 	MakeOpts MakeOpts      `json:"make_opts"` // makefile options

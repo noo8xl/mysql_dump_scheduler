@@ -1,15 +1,43 @@
-package initializator
+package initializers
 
 import (
 	"database/sql"
 	"errors"
 	"log"
 	"strings"
+
+	"github.com/noo8xl/mysql_dump_scheduler/common"
 )
+
+// @description:
+// SetDatabaseConfig -> set sql.db instance and configure database options
+//
+//	type DatabaseConfig struct {
+//		Host         string   `json:"host"`
+//		Port         string   `json:"port"`
+//		User         string   `json:"user"`
+//		Password     string   `json:"password"`
+//		Database     string   `json:"database"`
+//		SqlFilesPath SqlFiles `json:"file_path"`     // path to the file to insert the data
+//		DumpDirPath  string   `json:"dump_dir_path"` // path to the dump directory`
+//	}
+func (s *initializersService) SetDatabaseConfig(db *sql.DB, opts common.DatabaseConfig) error {
+	if opts.Host == "" || opts.Password == "" || opts.User == "" || opts.Database == "" {
+		return errors.New("error: some database config oprions is empty")
+	}
+
+	if db == nil {
+		return errors.New("error: db instance is nil")
+	}
+
+	s.dbConfig = &opts
+	s.db = db
+	return nil
+}
 
 // initializeDatabaseIfNotExists -> initialize database if not exists
 // use only once during the first start of the service
-func (s *initializatorService) InitializeDatabaseIfNotExists() error {
+func (s *initializersService) InitializeDatabaseIfNotExists() error {
 
 	// s.db = s.connectToDatabase()
 	// defer s.db.Close()

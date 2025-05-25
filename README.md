@@ -3,32 +3,70 @@
 
 ## Usage
 
-Just a simple script to dump the database and compress it. It also can be sent to the telegram (optional).
+It's just a simple lib to interact with mysql database.
 
-set the options before the initialization:
+The main functional possibilities are: 
+- create a mysql dump file;
+- compress it;
+- send it via telegram (optional);
+- init database if not exists;
+- set default db data;
 
-SchedulerOpts {
-  DatabaseConfig {
+
+### Example
+
+import (
+  mds "github.com/noo8xl/mysql_dump_scheduler"
+)
+
+func main( ) {
+
+  var db *sql.DB // call your db instance here * 
+
+  // db params
+  opts := mds.DatabaseConfig {
     Host: "localhost",
     Port: "3306",
     User: "root",
     Password: "password",
-    Name: "database_name",
+    Database: "database_name",
+    SqlFilesPath: &SqlFiles{
+      TablesFilePath: "path/to-your/tables.sql",
+      DataFilePath: "path/to-your/data.sql",
+    },
+    DumpDirPath: "path/to-your/backup/dir" // optional (use for the scheduler)
   }
-  TelegramConfig {
-    ChatId: "1234567890",
-    Token: "your-telegram_bot_token", 
+
+  // telegram opts ( optional, use only if you want to send the file to your telegram bot )
+  tgOpts := mds.TelegramConfig {
+    ChatId: "your-chat-id",
+    Token: "your-bot-token",
   }
-  SchedulerConfig {
-    Duration: 1 * time.Hour, // set a duration to run the scheduler
-    Path: "./dumps", // path to the dir where the <backup> folder will be created to store the dump file
+
+  // scheduler config 
+  schedulerOpts := mds.SchedulerConfig {
+    Path: "path/to/the/dump.sql",
+    Duration: 24 * time.Hour,
+    MakeOpts: &MakeOpts{ // can be omitted. use if u want to use a makefile options
+      RunPath: "path/to/your/Makefile",
+    }      
+  }
+
+  // call the service to init your database and set default data (optional)
+  initSvc := mds.InitService()
+  
+  initSvc.SetDatabaseConfig(db, opts)
+  initSvc.InitializeDatabaseIfNotExists()
+
+  // to run scheduler 
+  schedulerSvc := mds.InitScheduler()
+
+  schedulerSvc.SetDatabaseConfig(opts)
+  schedulerSvc.SetTelegramConfig(tgOpts)
+  schedulerSvc.SetSchedulerConfig(schedulerOpts)
+
+  
+  if err := schedulerSvc.Bootstrap(context.Background()); err != nil {
+    log.Fatalf("error: scheduler fail with err: %v", err)
   }
 }
-
-to Init the service -> InitScheduler(opts SchedulerOpts)
-
-to run the service -> Bootstrap()
-
-to send the file to the telegram -> SendFile() (optional)
-
-

@@ -22,7 +22,7 @@ func InitScheduler() *SchedulerService {
 func (s *SchedulerService) SetDatabaseConfig(opts *common.DatabaseConfig) error {
 
 	if opts.Host == "" || opts.Port == "" || opts.User == "" || opts.Password == "" || opts.Database == "" {
-		return errors.New("error: DatabaseConfig is not set")
+		return errors.New("error: databaseConfig is not set")
 	}
 
 	s.DatabaseConfig = opts
@@ -32,7 +32,7 @@ func (s *SchedulerService) SetDatabaseConfig(opts *common.DatabaseConfig) error 
 func (s *SchedulerService) SetTelegramConfig(opts *common.TelegramConfig) error {
 
 	if opts.ChatId == "" {
-		return errors.New("error: TelegramConfig is not set")
+		return errors.New("error: telegramConfig is not set")
 	}
 
 	s.TelegramConfig = opts
@@ -42,7 +42,7 @@ func (s *SchedulerService) SetTelegramConfig(opts *common.TelegramConfig) error 
 func (s *SchedulerService) SetSchedulerConfig(opts *common.SchedulerConfig) error {
 
 	if opts.Duration == 0 {
-		return errors.New("error: Duration is not set")
+		return errors.New("error: duration is not set")
 	}
 
 	s.SchedulerConfig = opts

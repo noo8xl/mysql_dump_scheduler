@@ -13,7 +13,7 @@ import (
 // @return *os.File if success, error otherwise
 func (s *SchedulerService) createDumpFile() (*os.File, error) {
 
-	if !s.SchedulerConfig.MakeOpts.IsEnable {
+	if s.SchedulerConfig.MakeOpts.RunPath == "" {
 		if err := s.dumpScript(); err != nil {
 			return nil, fmt.Errorf("failed to create dump file: %v", err)
 		}

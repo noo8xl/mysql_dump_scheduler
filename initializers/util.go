@@ -1,4 +1,4 @@
-package initializator
+package initializers
 
 import (
 	"fmt"
@@ -7,12 +7,12 @@ import (
 	"strings"
 )
 
-func (s *initializatorService) getConnenctionString() string {
+func (s *initializersService) getConnenctionString() string {
 	str := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", s.dbConfig.User, s.dbConfig.Password, s.dbConfig.Host, s.dbConfig.Port, s.dbConfig.Database)
 	return str
 }
 
-func (s *initializatorService) runSQLFile(filePath string) error {
+func (s *initializersService) runSQLFile(filePath string) error {
 
 	sqlBytes, err := os.ReadFile(filePath)
 	if err != nil {
