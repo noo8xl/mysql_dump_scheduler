@@ -15,6 +15,7 @@ The main functional possibilities are:
 
 ### Example
 
+```go
 import (
   mds "github.com/noo8xl/mysql_dump_scheduler"
 )
@@ -54,7 +55,7 @@ func main( ) {
 
   // call the service to init your database and set default data (optional)
   initSvc := mds.InitService()
-  
+
   initSvc.SetDatabaseConfig(db, opts)
   initSvc.InitializeDatabaseIfNotExists()
 
@@ -70,3 +71,5 @@ func main( ) {
     log.Fatalf("error: scheduler fail with err: %v", err)
   }
 }
+
+```go
