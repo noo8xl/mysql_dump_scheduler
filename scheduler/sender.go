@@ -7,12 +7,16 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"path/filepath"
 )
 
-// @SendFileToTelegram -> send the file to the telegram
-func (s *SchedulerService) sendFileToTelegram(file *os.File) error {
+// @sendFileToTelegram -> send the file to the telegram
+func (s *SchedulerService) sendFileToTelegram() error {
+
+	file, err := s.getCompressedFile()
+	if err != nil {
+		return err
+	}
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -58,39 +62,3 @@ func (s *SchedulerService) sendFileToTelegram(file *os.File) error {
 	log.Printf("Sender response is : %v", string(r))
 	return nil
 }
-
-// func sendFile(dto TelegramDto) error {
-
-// 	chatID, err := strconv.ParseInt(dto.ChatId, 10, 64)
-// 	if err != nil {
-// 		log.Printf("Failed to parse TELEGRAM_CHAT_ID: %v", err)
-// 		return err
-// 	}
-// 	botToken := os.Getenv("TELEGRAM_BOT_TOKEN")
-// 	if botToken == "" {
-// 		log.Println("TELEGRAM_BOT_TOKEN is not set")
-// 		return err
-// 	}
-
-// 	bot, err := tgbotapi.NewBotAPI(botToken)
-// 	if err != nil {
-// 		log.Printf("Failed to create Telegram bot: %v", err)
-// 		return err
-// 	}
-
-// 	// Create a file upload message instead of a text message
-// 	fileDoc := tgbotapi.NewDocument(chatID, tgbotapi.FileReader{
-// 		Name:   dto.File.Name(),
-// 		Reader: dto.File,
-// 	})
-// 	fileDoc.Caption = "Database dump file"
-
-// 	_, err = bot.Send(fileDoc)
-// 	if err != nil {
-// 		log.Printf("Failed to send Telegram file: %v", err)
-// 		return err
-// 	}
-
-// 	log.Printf("Telegram file sent successfully")
-// 	return nil
-// }
