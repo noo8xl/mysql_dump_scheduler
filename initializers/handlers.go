@@ -21,7 +21,7 @@ import (
 //		SqlFilesPath SqlFiles `json:"file_path"`     // path to the file to insert the data
 //		DumpDirPath  string   `json:"dump_dir_path"` // path to the dump directory`
 //	}
-func (s *InitializersService) SetDatabaseConfig(db *sql.DB, opts common.DatabaseConfig) error {
+func (s *InitializersService) SetDatabaseConfig(db *sql.DB, opts *common.DatabaseConfig) error {
 	if opts.Host == "" || opts.Password == "" || opts.User == "" || opts.Database == "" {
 		return errors.New("error: some database config oprions is empty")
 	}
@@ -30,7 +30,7 @@ func (s *InitializersService) SetDatabaseConfig(db *sql.DB, opts common.Database
 		return errors.New("error: db instance is nil")
 	}
 
-	s.dbConfig = &opts
+	s.dbConfig = opts
 	s.db = db
 	return nil
 }
