@@ -28,7 +28,7 @@ func (s *SchedulerService) createDumpFile() (*os.File, error) {
 		fmt.Sprintf("DB_USER=%s", s.DatabaseConfig.User),
 		fmt.Sprintf("DB_PASSWORD=%s", s.DatabaseConfig.Password),
 		fmt.Sprintf("DB_NAME=%s", s.DatabaseConfig.Database),
-		fmt.Sprintf("DB_DUMP_DIR=%s", s.DatabaseConfig.DumpDirPath),
+		fmt.Sprintf("DB_DUMP_DIR=%s", s.DatabaseConfig.SqlFilesPath.DumpDirPath),
 	)
 
 	output, err := cmd.CombinedOutput()
@@ -37,7 +37,7 @@ func (s *SchedulerService) createDumpFile() (*os.File, error) {
 		return nil, fmt.Errorf("failed to create dump file: %v, output: %s", err, output)
 	}
 
-	file, err := os.Open(s.DatabaseConfig.DumpDirPath + "/" + s.DatabaseConfig.Database + ".sql")
+	file, err := os.Open(s.DatabaseConfig.SqlFilesPath.DumpDirPath + "/" + s.DatabaseConfig.Database + ".sql")
 	if err != nil {
 		return nil, fmt.Errorf("failed to open dump file: %v", err)
 	}
@@ -48,7 +48,7 @@ func (s *SchedulerService) createDumpFile() (*os.File, error) {
 
 func (s *SchedulerService) compressDumpFile() error {
 
-	filePath := s.SchedulerConfig.Path + "/" + s.DatabaseConfig.Database + ".sql"
+	filePath := s.DatabaseConfig.SqlFilesPath.DumpDirPath + "/" + s.DatabaseConfig.Database + ".sql"
 	cmd := exec.Command("gzip", "-f", filePath)
 
 	output, err := cmd.CombinedOutput()
@@ -61,7 +61,7 @@ func (s *SchedulerService) compressDumpFile() error {
 
 func (s *SchedulerService) getCompressedFile() (*os.File, error) {
 
-	compressedFilePath := s.SchedulerConfig.Path + "/" + s.DatabaseConfig.Database + ".gz"
+	compressedFilePath := s.DatabaseConfig.SqlFilesPath.DumpDirPath + "/" + s.DatabaseConfig.Database + ".sql.gz"
 	file, err := os.Open(compressedFilePath)
 	if err != nil {
 		log.Printf("getCompressedFile error: failed to open compressed file: %v", err)
@@ -74,12 +74,12 @@ func (s *SchedulerService) dumpScript() error {
 
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
 
-	if err := os.MkdirAll(s.DatabaseConfig.DumpDirPath, 0755); err != nil {
+	if err := os.MkdirAll(s.DatabaseConfig.SqlFilesPath.DumpDirPath, 0755); err != nil {
 		fmt.Printf("Error creating directory: %v\n", err)
 		os.Exit(1)
 	}
 
-	outputFile := filepath.Join(s.DatabaseConfig.DumpDirPath, fmt.Sprintf("%s_%s.sql", s.DatabaseConfig.Database, timestamp))
+	outputFile := filepath.Join(s.DatabaseConfig.SqlFilesPath.DumpDirPath, fmt.Sprintf("%s_%s.sql", s.DatabaseConfig.Database, timestamp))
 	cmd := exec.Command("mysqldump",
 		"-h", s.DatabaseConfig.Host,
 		"-P", s.DatabaseConfig.Port,
@@ -100,7 +100,36 @@ func (s *SchedulerService) dumpScript() error {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Database dump created at %s\n", outputFile)
+	s.logChan <- fmt.Sprintf("Database dump created at %s\n", outputFile)
+
+	return nil
+}
+
+// @Run -> run the scheduler in following order:
+//  1. set the timer
+//  2. create the dump file
+//  3. compress the dump file
+//  4. send the file to the telegram // -> optional
+func (s *SchedulerService) run() error {
+
+	file, err := s.createDumpFile()
+	if err != nil {
+		return err
+	}
+
+	s.SchedulerConfig.File = file
+	if err := s.compressDumpFile(); err != nil {
+		return err
+	}
+
+	s.logChan <- "SchedulerService::run: dump file created"
+
+	if s.TelegramConfig.ChatId != "" {
+		if err := s.sendFileToTelegram(); err != nil {
+			return err
+		}
+		s.logChan <- "SchedulerService::run: file sent to telegram"
+	}
 
 	return nil
 }

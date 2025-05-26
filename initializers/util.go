@@ -7,12 +7,12 @@ import (
 	"strings"
 )
 
-func (s *initializersService) getConnenctionString() string {
+func (s *InitializersService) getConnenctionString() string {
 	str := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", s.dbConfig.User, s.dbConfig.Password, s.dbConfig.Host, s.dbConfig.Port, s.dbConfig.Database)
 	return str
 }
 
-func (s *initializersService) runSQLFile(filePath string) error {
+func (s *InitializersService) runSQLFile(filePath string) error {
 
 	sqlBytes, err := os.ReadFile(filePath)
 	if err != nil {

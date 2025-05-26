@@ -18,6 +18,8 @@ func (s *SchedulerService) sendFileToTelegram() error {
 		return err
 	}
 
+	s.logChan <- "SchedulerService::sendFileToTelegram: file found"
+
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 

@@ -3,6 +3,7 @@ package scheduler
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/noo8xl/mysql_dump_scheduler/common"
@@ -12,11 +13,14 @@ type SchedulerService struct {
 	DatabaseConfig  *common.DatabaseConfig
 	TelegramConfig  *common.TelegramConfig
 	SchedulerConfig *common.SchedulerConfig
+	logChan         chan string
 }
 
 // @InitScheduler -> Initialize the scheduler
-func InitScheduler() *SchedulerService {
-	return &SchedulerService{}
+func InitSchedulerService() *SchedulerService {
+	return &SchedulerService{
+		logChan: make(chan string, 500),
+	}
 }
 
 func (s *SchedulerService) SetDatabaseConfig(opts *common.DatabaseConfig) error {
@@ -55,39 +59,19 @@ func (s *SchedulerService) Bootstrap(ctx context.Context) error {
 	ticker := time.NewTicker(s.SchedulerConfig.Duration)
 	defer ticker.Stop()
 
+	s.logChan <- "SchedulerService::Bootstrap: started"
+
 	for {
 		select {
 		case <-ticker.C:
-			if err := s.Run(); err != nil {
+			if err := s.run(); err != nil {
 				return err
 			}
-			if s.TelegramConfig.ChatId != "" {
-				if err := s.sendFileToTelegram(); err != nil {
-					return err
-				}
-			}
+		case msg := <-s.logChan:
+			log.Println(msg)
 		case <-ctx.Done():
+			s.logChan <- "Scheduler shutting down"
 			return nil
 		}
 	}
-}
-
-// @Run -> run the scheduler in following order:
-//  1. set the timer
-//  2. create the dump file
-//  3. compress the dump file
-//  4. send the file to the telegram // -> optional
-func (s *SchedulerService) Run() error {
-
-	file, err := s.createDumpFile()
-	if err != nil {
-		return err
-	}
-
-	s.SchedulerConfig.File = file
-	if err := s.compressDumpFile(); err != nil {
-		return err
-	}
-
-	return nil
 }
