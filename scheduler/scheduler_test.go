@@ -32,7 +32,7 @@ var (
 
 	schedulerConfig = &common.SchedulerConfig{
 		Duration: 3 * time.Second,
-		MakeOpts: common.MakeOpts{
+		MakeOpts: &common.MakeOpts{
 			RunPath: "path/to/dir/with/your/Makefile",
 		},
 	}

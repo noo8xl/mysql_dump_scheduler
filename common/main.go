@@ -32,5 +32,5 @@ type MakeOpts struct {
 type SchedulerConfig struct {
 	File     *os.File      `json:"file"`      // file will be set after the dump is created
 	Duration time.Duration `json:"duration"`  // duration of the scheduler
-	MakeOpts MakeOpts      `json:"make_opts"` // makefile options
+	MakeOpts *MakeOpts     `json:"make_opts"` // makefile options
 }

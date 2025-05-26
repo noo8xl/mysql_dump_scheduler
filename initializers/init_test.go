@@ -9,18 +9,19 @@ import (
 )
 
 var (
-	initSvc  *initializers.InitializersService
-	db       *sql.DB
-	dbConfig = common.DatabaseConfig{
+	initSvc *initializers.InitializersService
+	db      *sql.DB
+
+	dbConfig = &common.DatabaseConfig{
 		Host:     "localhost",
 		Port:     "3306",
 		User:     "root",
 		Password: "password",
 		Database: "test",
 		SqlFilesPath: &common.SqlFiles{
-			TablesFilePath: "/home/noo8xl/Documents/workspace/ANVIL/anvil-reviews/database/schemes/db.sql",
-			DataFilePath:   "/home/noo8xl/Documents/workspace/ANVIL/anvil-reviews/database/data/data.sql",
-			DumpDirPath:    "/home/noo8xl/Documents/workspace/ANVIL/anvil-reviews/database/backups",
+			TablesFilePath: "path/to/ur/database/schemes/db.sql",
+			DataFilePath:   "path/to/ur/data.sql",
+			DumpDirPath:    "path/to/ur/backups/dir/",
 		},
 	}
 )
